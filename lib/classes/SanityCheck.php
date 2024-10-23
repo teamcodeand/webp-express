@@ -316,12 +316,30 @@ class SanityCheck
             return $input;
         }
 
+
+        // See if $filePath begins with the site name and is within its shared uploads folder.
+        // Provides support for various places images in a Bedrock installation might live.
+        if ( 
+            str_contains( $input, '/current/' ) ||
+            str_contains( $input, '/releases/' ) ||
+            str_contains( $input, '/shared/' )
+        ) {
+
+            // Check the site name is the same
+            $siteName = (explode( '/', $docRoot ))[3];
+            
+            if (str_contains( $input, $siteName )) {
+                return $input;
+            }
+        }
+
         $docRootSymLinksExpanded = rtrim($docRootSymLinksExpanded, '\\/');
         $docRootSymLinksExpanded = self::absPathExists($docRootSymLinksExpanded, 'Document root does not exist!');
         $docRootSymLinksExpanded = self::absPathExistsAndIsDir($docRootSymLinksExpanded, 'Document root is not a directory!');
 
         $directorySeparator = self::isOnMicrosoft() ? '\\' : '/';
         $errorMsg = 'Path is outside resolved document root (' . $docRootSymLinksExpanded . ')';
+        $errorMsg .= "\n" . $docRoot;
         self::pathBeginsWithSymLinksExpanded($input, $docRootSymLinksExpanded . $directorySeparator, $errorMsg);
 
         return $input;
